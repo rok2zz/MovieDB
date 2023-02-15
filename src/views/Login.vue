@@ -2,7 +2,7 @@
 	<div :class="$style.index">
 		<div :class="$style.container">
 			<div :class="$style.title">
-				<span>로그인</span>
+				<img :src="require('@/assets/img/logo_black.png')">
 			</div>
 			<div :class="$style.input">
 				<input v-on:keydown="keydownHandler" type="text" placeholder="아이디를 입력하세요." v-model="userID">
@@ -11,7 +11,7 @@
 				<input v-on:keydown="keydownHandler" type="password" placeholder="비밀번호를 입력하세요." v-model="userPW">
 			</div>
 			<div :class="$style.login">
-				<button v-on:click="login()">로그인</button>
+				<button class="general-background-color" v-on:click="login()">로그인</button>
 			</div>
 			<div :class="$style.register">
 				<span>아직 회원이 아니신가요?</span>
@@ -35,12 +35,14 @@
 		border-radius: 12px;
 		box-shadow: 0px 0px 5px 5px #ccc;
 
-		> .title {
-			margin-bottom: 40px;
-			margin-left: 20px;
+		background-color: #fff;
 
-			font-size: 20px;
-			font-weight: bold;
+		> .title {
+			margin-bottom: 20px;
+
+			> img {
+				width: 150px;
+			}
 		}
 
 		> .input {
@@ -78,13 +80,7 @@
 				border-radius: 7px;
 				border: 0px;
 
-				background-color: #ccc;
-
 				cursor: pointer;
-			}
-			
-			> button:hover {
-				background-color: #eddffe;
 			}
 		}
 

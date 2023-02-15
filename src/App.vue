@@ -1,7 +1,7 @@
 <template>
 	<div :class="$style.index">
 		<div :class="$style.container">
-			<div :class="[$style.header, 'general-background-color']">
+			<div :class="[$style.header]">
 				<div :class="$style.contents">
 					<div :class="$style.logo" @click="goHomepage()">
 						<img :src="require('@/assets/img/logo_black.png')">
@@ -13,9 +13,15 @@
 							랜덤영화
 						</router-link>
 					</div>
+					<div :class="$style.search">
+						<div :class="$style.input">
+							<input @keydown="keydownHandler" type="text" placeholder="영화 제목을 입력하세요." v-model="searchQuery">
+							<img :src="require('@/assets/img/search.png')" @click="search()">
+						</div>
+					</div>
 					<div :class="$style.member">
-						<span v-if="isLoggedIn()" @click="goLoginPage()">로그인</span>
-						<span v-else>로그아웃</span>
+						<span v-if="isLoggedIn()" v-on:click="logout()">로그아웃</span>
+						<span v-else v-on:click="goLoginPage()">로그인</span>
 						<!-- <span>테마변경</span> -->
 					</div>
 				</div>
@@ -48,8 +54,14 @@ body {
 .index {
 	> .container {
 		width: 100%;
+		height: 100vh;
+
+		background-image: url("@/assets/img/search_background2.jpg");
+		background-size: 100%;
 
 		> .header {
+
+			border-bottom: 1px solid #141414;
 
 			> .contents {
 				max-width: 1200px;
@@ -87,8 +99,42 @@ body {
 					}
 				}
 
+				> .search {
+
+					margin-right: 50px;
+
+					> .input {
+						display: flex;
+
+						margin: 0 auto;
+						
+						> input {
+							width: 300px;
+
+							padding: 10px;
+
+							font-size: 15px;
+
+							border: none;
+							border-radius: 7px;
+
+							outline: none;
+						}
+
+						> img {
+							width: 25px;
+							height: 25px;
+
+							margin-top: 7px;
+							margin-left: 10px;
+
+							cursor: pointer;
+						}
+					}
+				}
+
 				> .member {
-					width: 100px;
+					width: 150px;
 
 					font-size: 15px;
 
@@ -120,21 +166,42 @@ import { Component, Vue, Watch } from 'vue-property-decorator';
 
 @Component
 export default class App extends Vue {
+	searchQuery: string = ""
 
 	goHomepage() {
-		this.$router.push("/")
+		if (this.$route.path != "/")
+			this.$router.push("/")
 	}
 
 	goLoginPage() {
-		this.$router.push("/login")
+		if (this.$route.path != "/login")
+			this.$router.push("/login")
 	}
 
 	isLoggedIn() {
-		return true
+		return this.$store.state.token != null
+	}
+
+	logout() {
+		this.$store.state.token = null
+
+		if (this.$route.path != "/") {
+			this.$router.push("/")
+		}
 	}
 
 	getRandomMovie(): string {
 		return "/"
+	}
+
+	search() {
+		this.$router.push("/search?query=" + this.searchQuery)
+	}
+
+	keydownHandler(e: KeyboardEvent) {
+		if (e.key == "Enter") {
+			this.search()
+		}
 	}
 
 	@Watch("$route.path")
