@@ -155,7 +155,7 @@ body {
 			width: 100%;
 
 			> .contents {
-				max-width: 1200px;
+				max-width: 800px;
 
 				margin: 0 auto;
 

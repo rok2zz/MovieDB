@@ -34,7 +34,7 @@
 	> .container {
 		width: 100%;
 		
-		margin-top: 50px;
+		padding-top: 50px;
 
 		> div {
 			width: 900px;

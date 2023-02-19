@@ -4,6 +4,7 @@ import Main from '../views/Main.vue'
 import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
 import Search from '../views/Search.vue'
+import Movies from '../views/Movies.vue'
 
 Vue.use(VueRouter)
 
@@ -27,6 +28,11 @@ const routes: Array<RouteConfig> = [
     path: '/search',
     name: 'search',
     component: Search
+  },
+  {
+    path: '/movies',
+    name: 'movies',
+    component: Movies
   }
 ]
 

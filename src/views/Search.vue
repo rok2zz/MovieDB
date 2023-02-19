@@ -1,10 +1,17 @@
 <template>
 	<div :class="$style.index">
 		<div :class="$style.container">
-			<div :class="$style.contents">
+			<div v-if="isLoaded()" :class="$style.contents">
 				<div :class="$style.title">
-					<span>'{{ getSearchQuery() }}''</span> 검색결과
+					<span>'{{ getSearchQuery() }}'</span>
 				</div>
+				<div :class="$style.list">
+					<SearchItems :movies="movies" />
+				</div>
+			</div>
+			
+			<div v-else :class="$style.loading" >
+				loading
 			</div>
 		</div>
 	</div>
@@ -15,25 +22,30 @@
 	> .container {
 		width: 100%;
 
-		margin-top: 50px;
+		padding: 50px 0px 50px;
 
-		> .contents {
-			width: 900px;
+
+		> div {
+			width: 700px;
 
 			margin: 0 auto;
-			margin-bottom: 50px;
+
+			font-size: 25px;
+			font-weight: bold;
+
+			text-align: center;
+		}
+
+		> .contents {
 
 			> .title {
 				width: 100%;
 
 				font-size: 20px;
 
-				text-align: center;
+				text-align: left;
 
-				> span {
-					font-size: 25px;
-					font-weight: bold;
-				}
+				color: #4646C7;
 			}
 		}
 	}
@@ -41,17 +53,21 @@
 </style>
 
 <script lang="ts">
+import SearchItems from '@/components/SearchItems.vue';
 import { Movie } from '@/structure/types';
 import { unwrapQuery } from '@/utils/formats';
 import axios from 'axios';
 import { Component, Vue, Watch } from 'vue-property-decorator';
 
 
-@Component
+@Component({
+	components: {
+		SearchItems
+	}
+})
 export default class Search extends Vue {
 	searchQuery: string = ""
-	searchResult: boolean = true
-	movies?: Movie
+	movies: Movie[] = []
 
 	mounted() {
 		this.init()
@@ -68,6 +84,10 @@ export default class Search extends Vue {
 		.catch(this.searchError).then(this.searchSuccess)
 	}
 
+	isLoaded(): boolean {
+		return this.movies != null
+	}
+
 	searchError(error: any) {
 		alert(error.response.data)
 	}
@@ -75,11 +95,9 @@ export default class Search extends Vue {
 	searchSuccess(res: any) {
 		if (res == null) return
 
-		if (res.search == "none") {
-			this.searchResult = false
-		}
+		if (res.search == "none") return
 
-		
+		this.movies = res.data.movies
 
 		this.$forceUpdate()
 	}

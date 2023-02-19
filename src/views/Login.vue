@@ -31,6 +31,7 @@
 
 		margin: 0 auto;
 		margin-top: 50px;
+		margin-bottom: 50px;
 
 		border-radius: 12px;
 		box-shadow: 0px 0px 5px 5px #ccc;

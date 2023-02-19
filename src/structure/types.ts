@@ -9,12 +9,12 @@ export interface Board {
 export interface Movie {
     id: number
     title: string
-    overview: string
-    posterPath: string
-    tagline: string
-    releaseDate: string
-    genres: string
-    country: string
+    overview?: string
+    poster_path?: string
+    tagline?: string
+    release_date?: string
+    genres?: string
+    country?: string
 }
 
 export interface User {
