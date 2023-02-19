@@ -1,7 +1,7 @@
 <template>
 	<div :class="$style.index">
 		<div :class="$style.container">
-			<div :class="[$style.header]">
+			<div :class="[$style.header, 'general-background-color']">
 				<div :class="$style.contents">
 					<div :class="$style.logo" @click="goHomepage()">
 						<img :src="require('@/assets/img/logo_black.png')">
@@ -16,7 +16,7 @@
 					<div :class="$style.search">
 						<div :class="$style.input">
 							<input @keydown="keydownHandler" type="text" placeholder="영화 제목을 입력하세요." v-model="searchQuery">
-							<img :src="require('@/assets/img/search.png')" @click="search()">
+							<img :src="require('@/assets/img/search.png')" @click="updateSearchQuery()">
 						</div>
 					</div>
 					<div :class="$style.member">
@@ -30,7 +30,7 @@
 				<router-view/>
 			</div>
 			<div :class="$style.footer">
-			
+				<div :class="$style.contents"></div>
 			</div>
 		</div>
 	</div>
@@ -54,14 +54,8 @@ body {
 .index {
 	> .container {
 		width: 100%;
-		height: 100vh;
-
-		background-image: url("@/assets/img/search_background2.jpg");
-		background-size: 100%;
 
 		> .header {
-
-			border-bottom: 1px solid #141414;
 
 			> .contents {
 				max-width: 1200px;
@@ -156,6 +150,18 @@ body {
 				}
 			}
 		}
+
+		> .footer{ 
+			width: 100%;
+
+			> .contents {
+				max-width: 1200px;
+
+				margin: 0 auto;
+
+				border-top: 1px solid #ccc;
+			}
+		}
 	}
 }
 </style>
@@ -194,13 +200,21 @@ export default class App extends Vue {
 		return "/"
 	}
 
-	search() {
-		this.$router.push("/search?query=" + this.searchQuery)
+	updateSearchQuery() {
+		if (this.searchQuery == "") {
+			return alert('검색어를 입력하세요.')
+		}
+
+		if (this.searchQuery == this.$route.query.query) {
+			return
+		}
+
+		this.$router.push({name: 'search', query: {query: this.searchQuery}});
 	}
 
 	keydownHandler(e: KeyboardEvent) {
 		if (e.key == "Enter") {
-			this.search()
+			this.updateSearchQuery()
 		}
 	}
 
@@ -222,6 +236,23 @@ export default class App extends Vue {
 				alert("로그인이 필요합니다.")
 				this.$router.push("/login")
 		}
+	}
+
+	@Watch('$route.path')
+	updatePath() {
+		this.scrollToTop()
+	}
+
+	@Watch('$route.query')
+	updateQuery() {
+		this.scrollToTop()
+	} 
+
+	scrollToTop() {
+		window.scrollTo({
+			top: 0,
+			behavior: 'smooth'
+		})
 	}
 }
 </script>

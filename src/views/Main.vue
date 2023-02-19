@@ -32,16 +32,15 @@
 <style lang="scss" module>
 .index {
 	> .container {
-		width: 1200px;
-
-		margin: 0 auto;
+		width: 100%;
+		
 		margin-top: 50px;
 
 		> div {
 			width: 900px;
 
-			margin: 0 auto;	
-			margin-bottom: 50px;		
+			margin: 0 auto;
+			margin-bottom: 50px;
 
 			> .title {
 				display: flex;
