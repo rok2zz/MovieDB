@@ -37,7 +37,7 @@
 		padding-top: 50px;
 
 		> div {
-			width: 900px;
+			width: 700px;
 
 			margin: 0 auto;
 			margin-bottom: 50px;
@@ -48,7 +48,7 @@
 				> .contents {
 					width: 100%;
 
-					font-size: 30px;
+					font-size: 25px;
 					font-weight: bold;
 				}
 
@@ -57,7 +57,7 @@
 
 					padding-top: 17px;
 
-					font-size: 15px;
+					font-size: 13px;
 
 					cursor: pointer;
 				}

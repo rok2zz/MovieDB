@@ -4,6 +4,7 @@ $primary-color: skyblue;
 $general-color-light: #ccc;
 
 body.light {
-
+    font-family: 'Noto Sans KR', sans-serif;
+    
     .general-background-color { background-color: $general-color-light; }
 }

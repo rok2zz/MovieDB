@@ -5,11 +5,13 @@
 				<div v-for="(item, index) in movies" :key="'movies' + index" :class="$style.list">
 					<router-link :to="getMovieID(item)">
 						<div :class="$style.poster">
-							<img :src="'https://www.themoviedb.org/t/p/w200' + item.poster_path">
+							<img v-if="isPosterExist(item)" :src="'https://www.themoviedb.org/t/p/w200' + item.poster_path">
+							<img v-else :src="require('@/assets/img/no_image.jpg')">
 						</div>
 						<div :class="$style.info">
 							<div :class="$style.title">
-								{{ getTitle(item.title) }}
+								<span>{{ getTitle(item.title) }}</span>
+								<span :class="$style.year">{{ getReleaseYear(item) }}</span>
 							</div>
 							<div :class="$style.tagline">
 								{{ getTagline(item) }}
@@ -79,6 +81,11 @@
 							font-weight: bold;
 
 							margin-bottom: 5px;
+
+							> .year {
+								font-size: 11px;
+								font-weight: normal;
+							}
 						}
 
 						> .tagline {
@@ -118,7 +125,7 @@ export default class SearchItems extends Vue {
 	}
 
 	getTitle(title: string): string {
-		return cutString(title, 10)
+		return cutString(title, 7)
 	}
 
 	getTagline(item: Movie): string {
@@ -131,6 +138,16 @@ export default class SearchItems extends Vue {
 		var movieID = (item.id).toString()
 
 		return {name: 'movies', query: {id : movieID}}
+	}
+
+	getReleaseYear(item: Movie): string {
+        let d = new Date(item.release_date ?? "")
+
+		return " (" + d.getFullYear().toString() + ")"
+	}
+
+	isPosterExist(item: Movie): boolean {
+		return item.poster_path != null
 	}
 
 }

@@ -94,7 +94,6 @@ body {
 				}
 
 				> .search {
-
 					margin-right: 50px;
 
 					> .input {
@@ -128,7 +127,7 @@ body {
 				}
 
 				> .member {
-					width: 150px;
+					width: 200px;
 
 					font-size: 15px;
 

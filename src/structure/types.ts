@@ -15,6 +15,16 @@ export interface Movie {
     release_date?: string
     genres?: string
     country?: string
+    runtime: number
+}
+
+export interface Review {
+    id: number
+    movie_id: number
+    reviewer_id: number
+    rating: number
+    review: string
+    writed_date: string
 }
 
 export interface User {

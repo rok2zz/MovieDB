@@ -5,6 +5,6 @@ export function unwrapQuery(val: string | (string | null)[]): string {
 }
 
 export function cutString(val: string, len: number): string {
-    if (val.length >= len) return val.substring(0, len) + "..."
+    if (val.length > len) return val.substring(0, len) + "..."
     return val
 }

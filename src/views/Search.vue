@@ -11,7 +11,7 @@
 			</div>
 			
 			<div v-else :class="$style.loading" >
-				loading
+				영화 정보를 불러오는 중입니다.
 			</div>
 		</div>
 	</div>
@@ -68,6 +68,7 @@ import { Component, Vue, Watch } from 'vue-property-decorator';
 export default class Search extends Vue {
 	searchQuery: string = ""
 	movies: Movie[] = []
+	loaded: boolean = false
 
 	mounted() {
 		this.init()
@@ -75,6 +76,8 @@ export default class Search extends Vue {
 
 	init() {
 		this.searchQuery = unwrapQuery(this.$route.query.query)
+
+		this.loaded = false
 
 		axios.get(process.env.VUE_APP_SERVER_ADDR + "/search/" + this.searchQuery, {
 			headers: {
@@ -85,7 +88,7 @@ export default class Search extends Vue {
 	}
 
 	isLoaded(): boolean {
-		return this.movies != null
+		return this.loaded
 	}
 
 	searchError(error: any) {
@@ -98,6 +101,7 @@ export default class Search extends Vue {
 		if (res.search == "none") return
 
 		this.movies = res.data.movies
+		this.loaded = true
 
 		this.$forceUpdate()
 	}
