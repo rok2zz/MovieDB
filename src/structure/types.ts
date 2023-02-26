@@ -10,9 +10,9 @@ export interface Movie {
     id: number
     title: string
     overview?: string
-    poster_path?: string
+    posterPath?: string
     tagline?: string
-    release_date?: string
+    releaseDate?: string
     genres?: string
     country?: string
     runtime: number
@@ -20,11 +20,12 @@ export interface Movie {
 
 export interface Review {
     id: number
-    movie_id: number
-    reviewer_id: number
+    movieID: number
+    reviewerID: number
+    reviewer: string
     rating: number
     review: string
-    writed_date: string
+    writedDate: string
 }
 
 export interface User {

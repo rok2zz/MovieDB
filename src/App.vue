@@ -7,8 +7,12 @@
 						<img :src="require('@/assets/img/logo_black.png')">
 					</div>
 					<div :class="$style.menu">
-						<span>영화</span>
-						<span>게시판</span>
+						<router-link :to="'/'">
+							<span>영화</span>
+						</router-link>
+						<router-link :to="getRandomMovie()">
+							<span>게시판</span>
+						</router-link>
 						<router-link :to="getRandomMovie()">
 							랜덤영화
 						</router-link>
@@ -51,12 +55,15 @@ body {
 </style>
 
 <style lang="scss" module>
+@import '@/assets/scss/utils.scss';
+
 .index {
 	> .container {
 		width: 100%;
 
 		> .header {
-
+			width: 100%;
+			
 			> .contents {
 				max-width: 1200px;
 				height: 100%;
@@ -80,9 +87,17 @@ body {
 				> .menu {
 					width: 100%;
 
-					font-size: 20px;
-
 					margin-left: 50px;
+
+					> a {
+						font-size: 18px;
+
+						margin-right: 15px;
+
+						text-decoration: none;
+
+						color: #14141A;
+					}
 
 					> span {
 						display: inline-block;

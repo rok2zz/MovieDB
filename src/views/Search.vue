@@ -68,7 +68,6 @@ import { Component, Vue, Watch } from 'vue-property-decorator';
 export default class Search extends Vue {
 	searchQuery: string = ""
 	movies: Movie[] = []
-	loaded: boolean = false
 
 	mounted() {
 		this.init()
@@ -76,8 +75,6 @@ export default class Search extends Vue {
 
 	init() {
 		this.searchQuery = unwrapQuery(this.$route.query.query)
-
-		this.loaded = false
 
 		axios.get(process.env.VUE_APP_SERVER_ADDR + "/search/" + this.searchQuery, {
 			headers: {
@@ -88,7 +85,11 @@ export default class Search extends Vue {
 	}
 
 	isLoaded(): boolean {
-		return this.loaded
+		if (this.movies.length > 0) {
+			return true
+		}
+
+		return false
 	}
 
 	searchError(error: any) {
@@ -101,7 +102,6 @@ export default class Search extends Vue {
 		if (res.search == "none") return
 
 		this.movies = res.data.movies
-		this.loaded = true
 
 		this.$forceUpdate()
 	}

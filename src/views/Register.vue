@@ -155,6 +155,10 @@ export default class Register extends Vue {
 			return alert("필수 항목을 입력해주세요.")
 		}
 
+		if (this.id.length < 4) {
+			return alert("아이디는 4글자 이상이어야합니다.")
+		}
+
 		if (!confirm("가입하시겠습니까?")) return
 
 		let genderInit = 0

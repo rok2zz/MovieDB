@@ -5,7 +5,7 @@
 				<div v-for="(item, index) in movies" :key="'movies' + index" :class="$style.list">
 					<router-link :to="getMovieID(item)">
 						<div :class="$style.poster">
-							<img v-if="isPosterExist(item)" :src="'https://www.themoviedb.org/t/p/w200' + item.poster_path">
+							<img v-if="isPosterExist(item)" :src="'https://www.themoviedb.org/t/p/w200' + item.posterPath">
 							<img v-else :src="require('@/assets/img/no_image.jpg')">
 						</div>
 						<div :class="$style.info">
@@ -119,7 +119,6 @@ import { RawLocation } from 'vue-router';
 export default class SearchItems extends Vue {
 	@Prop() movies?: Movie[]
 
-
 	isMoviesExists(): boolean {
 		return this.movies != null
 	}
@@ -141,13 +140,13 @@ export default class SearchItems extends Vue {
 	}
 
 	getReleaseYear(item: Movie): string {
-        let d = new Date(item.release_date ?? "")
+        let d = new Date(item.releaseDate ?? "")
 
 		return " (" + d.getFullYear().toString() + ")"
 	}
 
 	isPosterExist(item: Movie): boolean {
-		return item.poster_path != null
+		return item.posterPath != null
 	}
 
 }
