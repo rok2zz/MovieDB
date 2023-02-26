@@ -2,6 +2,7 @@
 	<div :class="$style.index">
 		<div :class="$style.container">
 			<div v-if="isLoaded()" :class="$style.contents">
+				<!-- 영화 정보 -->
 				<div :class="$style.movie">
 					<div :class="$style.poster">
 						<img v-if="isPosterExist()"  :src="'https://www.themoviedb.org/t/p/w200' + getPosterPath()">
@@ -28,19 +29,51 @@
 					</div>
 				</div>
 
+				<!-- 평점 및 리뷰 -->
 				<div :class="$style.reviews">
 					<div :class="$style.title">
 						평점 및 리뷰
 					</div>
-					<div v-if="isRated()" :class="$style.rating">
-						평점
+					<div v-if="isReviewsExist()" :class="$style.rating">
+						<span v-for="index in 5" :key="index" :class="$style.star">
+							<img v-if="getAverageRating() >= index" :src="require('@/assets/img/star.png')">
+							<img v-else-if="getAverageRating() >= (index - 0.5)" :src="require('@/assets/img/half_star.png')">
+							<img v-else :src="require('@/assets/img/empty_star.png')">
+						</span>
+						<span :class="$style.getRating">{{ getAverageRating() }}점</span>
 					</div>
 					<div v-else :class="$style.notExist">
 						작성된 평점 및 리뷰가 없습니다. <br>
 						첫 번째 리뷰를 작성해보세요!
 					</div>
 
-					<div :class="$style.write">
+					<!-- 나의 리뷰 -->
+					<div v-if="isMyReviewExist()" :class="$style.myReview">
+						<div :class="$style.contents">
+							<div :class="$style.rating">
+								<span v-for="index in 5" :key="index" :class="$style.star">
+									<img v-if="getMyRating() >= index" :src="require('@/assets/img/star.png')">
+									<img v-else-if="getMyRating() >= (index - 0.5)" :src="require('@/assets/img/half_star.png')">
+									<img v-else :src="require('@/assets/img/empty_star.png')">
+								</span>
+								<span :class="$style.getRating">{{ getMyRating() }}점</span>
+							</div>
+							<div :class="$style.info">
+								<div :class="$style.reviewer">{{ getMyReviewID() }}</div>
+								<div :class="$style.date">{{ getWritedDate(getMyReviewDate()) }}</div>
+							</div>
+						</div>
+						<div :class="$style.review">
+							{{ getMyReview() }}
+						</div>
+						<div :class="$style.delete">
+							<div :class="$style.empty"></div>
+							<span @click="deleteMyReview()">삭제</span>
+						</div>
+					</div>
+
+					<!-- 리뷰 작성 -->
+					<div v-else :class="$style.write">
 						<div :class="$style.rating">
 							<span v-for="index in 5" :key="index" :class="$style.star">
 								<img v-if="getRating() >= index" @click="setRating(index - 1)" :src="require('@/assets/img/star.png')">
@@ -51,10 +84,17 @@
 						<textarea placeholder="리뷰는 최대 500자 까지 등록 가능합니다." v-model="review"></textarea>
 						<button @click="submitReview()">등록하기</button>
 					</div>
+
+					<!-- 리뷰 목록 -->
+					<div :class="$style.contents">
+						
+					</div>
 				</div>
 			</div>
+
+			<!-- DB에 영화 정보가 없음 -->
 			<div v-else :class="$style.fail">
-				검색 실패
+				영화 정보를 불러올 수 없습니다.
 			</div>
 		</div>
 	</div>
@@ -144,6 +184,102 @@
 
 			> .reviews {
 				margin-top: 30px;
+
+				> .rating {
+					display: flex;
+
+					> .star {
+
+						> img {
+							width: 20px;
+						}
+					}
+
+					> .getRating {
+						margin-left: 10px;
+
+						transform: translateY(-2px)
+					}
+				}
+
+				> .myReview {
+					margin-top: 20px;
+					padding: 5px;
+
+					display: flex;
+
+					box-shadow: 0px 0px 5px 1px #ccc;
+					border-radius: 8px;
+
+					> .contents {
+
+
+						> .rating {
+							display: flex;
+
+
+							> .star {
+
+								> img {
+									width: 15px;
+								}
+							}
+
+							> .getRating {
+								font-size: 8px;
+
+								margin-left: 10px;
+
+								transform: translateY(2px)
+							}
+						}
+
+						
+						> .info {
+							font-size: 10px;
+
+							> .reviewer {
+								font-weight: bold;
+							}
+						}
+					}
+
+					> .review {
+						width: 500px;
+
+						font-size: 12px;
+
+						margin-left: 50px;
+					}
+
+					> .delete {
+						margin-left: 10px;
+
+						> span {
+							height: 20px;
+							
+							display: inline-block;
+
+							font-size: 12px;
+
+							color: rgb(49, 49, 199);
+
+							transform: translateY(-20px);
+
+							cursor: pointer;
+						}
+
+						> span:hover {
+							font-weight: bold;
+
+							text-decoration: underline;
+						}
+
+						> .empty {
+							height: 100%;
+						}
+					}
+				}
 
 				> .title {
 					font-weight: bold;
@@ -248,13 +384,15 @@ export default class Movies extends Vue {
 	movieID: string = ""
 	movie?: Movie
 
-	rated: boolean = false
-	reviews?: Review[] = []
-	count?: number
+	reviewsExist: boolean = false
+
+	reviews: Review[] = []
+	count: number = 1
 	review: string = ""
 	rating: number = 0
 	myReview?: string
 	myRating?: number
+	myReviewID: number = 0
 
 
 	mounted() {
@@ -269,18 +407,25 @@ export default class Movies extends Vue {
 				"authorization": this.$store.state.token
 			}
 		})
-		.catch(this.getMovieError).then(this.getMovieSuccess)
+		.catch(this.errorHandler).then(this.getMovieSuccess)
+
+		this.getReviews()
 	}
 
-	updateReviews() {
-		
+	getReviews() {
+		axios.get(process.env.VUE_APP_SERVER_ADDR + "/review/" + this.movieID, {
+			headers: {
+				"authorization": this.$store.state.token
+			}
+		})
+		.catch(this.errorHandler).then(this.getReviewsSuccess)
 	}
 
 	isLoaded(): boolean {
 		return this.movie != null
 	}
 
-	getMovieError(error: any) {
+	errorHandler(error: any) {
 		alert(error.response.data)
 	}
 
@@ -289,12 +434,15 @@ export default class Movies extends Vue {
 
 		this.movie = res.data.movie
 
-		// if (res.data.reviews == null)  return 
+		this.$forceUpdate()
+	}
 
-		// this.reviews = res.data.reviews
-		// this.count = res.data.count
+	getReviewsSuccess(res: any) {
+		if (res == null) return
 
-		// this.rated = true
+		this.reviews = res.data.reviews
+		this.count = res.data.count
+		this.myReviewID = res.data.myReviewID
 
 		this.$forceUpdate()
 	}
@@ -304,7 +452,7 @@ export default class Movies extends Vue {
 	}
 
 	getPosterPath(): string {
-		return this.getMovie()?.poster_path ?? ""
+		return this.getMovie()?.posterPath ?? ""
 	} 
 
 	getTitle(): string {
@@ -312,7 +460,7 @@ export default class Movies extends Vue {
 	}
 
 	getReleaseYear(): string {
-        let d = new Date(this.getMovie().release_date ?? "")
+        let d = new Date(this.getMovie().releaseDate ?? "")
 
 		return " (" + d.getFullYear().toString() + ")"
 	}
@@ -328,7 +476,7 @@ export default class Movies extends Vue {
 	}
 
 	getReleaseDate(): string {
-        let d = new Date(this.getMovie().release_date ?? "")
+        let d = new Date(this.getMovie().releaseDate ?? "")
 
 		return d.getFullYear().toString() + "." + d.getMonth().toString() + "." + d.getDate().toString()
 	}
@@ -353,22 +501,119 @@ export default class Movies extends Vue {
 		this.rating = rate
 	}
 
-	isPosterExist(): boolean {
-		return this.getMovie().poster_path != null
+	getAverageRating(): number {
+		let sum = 0
+
+		for (var i = 0; i < this.reviews.length; i++) {
+			sum += this.reviews[i].rating
+		}
+
+		let avarage = sum / this.count
+		return avarage
 	}
 
-	isRated(): boolean {
-		return this.rated
+	getMyRating(): number {
+		for (var i = 0; i < this.reviews.length; i++) {
+			if (this.reviews[i].id == this.myReviewID) {
+				return this.reviews[i].rating
+			}
+		}
+
+		return 0
+	}
+
+	getMyReview(): string {
+		for (var i = 0; i < this.reviews.length; i++) {
+			if (this.reviews[i].id == this.myReviewID) {
+				return this.reviews[i].review
+			}
+		}
+
+		return ""
+	}
+
+	getMyReviewID(): string {
+		for (var i = 0; i < this.reviews.length; i++) {
+			if (this.reviews[i].id == this.myReviewID) {
+				return this.reviews[i].reviewer
+			}
+		}
+
+		return ""
+	}
+
+	getMyReviewDate(): string {
+		for (var i = 0; i < this.reviews.length; i++) {
+			if (this.reviews[i].id == this.myReviewID) {
+				return this.reviews[i].writedDate
+			}
+		}
+
+		return ""
+	}
+
+	getWritedDate(date: string): string {
+		let d = new Date(date)
+
+		return d.getFullYear().toString() + "." + d.getMonth().toString() + "." + d.getDate().toString()	
+	}
+
+	isPosterExist(): boolean {
+		return this.getMovie().posterPath != null
+	}
+
+	isReviewsExist(): boolean {
+		if (this.reviews.length > 0) {
+			return true
+		}
+
+		return false
+	}
+
+	isMyReviewExist(): boolean {
+		if (this.myReviewID > 0) {
+			return true
+		}
+
+		return false
+	}
+
+	deleteMyReview() {
+		if (this.$store.state.token == null) {
+			return alert("로그인이 필요합니다.")
+		}
+
+		if (!confirm("삭제하시겠습니까?")) return
+
+		axios.post(process.env.VUE_APP_SERVER_ADDR + "/review/delete", {
+			myReviewID: this.myReviewID
+		}, {
+			headers: {
+				"authorization": this.$store.state.token
+			}
+		}).catch(this.errorHandler).then(this.deleteReviewSuccess)
+	}
+
+	deleteReviewSuccess(res: any) {
+		if (res == null) return
+
+		alert("삭제되었습니다.")
+
+		this.getReviews()
 	}
 
 	submitReview() {
+		if (this.$store.state.token == null) {
+			return alert("로그인이 필요합니다.")
+		}
+
 		if (this.review == null || this.review == "") {
 			return alert("리뷰를 입력해주세요.")
 		}
 
 		if (!confirm("등록하시겠습니까?")) return
 
-		axios.post(process.env.VUE_APP_SERVER_ADDR + "/review", {
+		axios.post(process.env.VUE_APP_SERVER_ADDR + "/review/write", {
 			rating: this.rating,
 			review: this.review,
 			movie_id: this.movieID
@@ -376,22 +621,20 @@ export default class Movies extends Vue {
 			headers: {
 				"authorization": this.$store.state.token
 			}
-		}).catch(this.reviewError).then(this.reviewSuccess)
+		}).catch(this.errorHandler).then(this.submitReviewSuccess)
  	}
 
-	 reviewError(error: any) {
-		alert(error.response.data)
-	}
-
-	reviewSuccess(res: any) {
+	submitReviewSuccess(res: any) {
 		if (res == null) return
 
 		alert("등록되었습니다.")
+
+		this.getReviews()
 	}
 
 	@Watch("this.reviews")
-	update() {
-
+	updateReviews() {
+		this.getReviews()
 	}
 }
 </script>
