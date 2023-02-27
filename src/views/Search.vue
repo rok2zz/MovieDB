@@ -6,12 +6,16 @@
 					<span>'{{ getSearchQuery() }}'</span>
 				</div>
 				<div :class="$style.list">
-					<SearchItems :movies="movies" />
+					<MovieItems :movies="movies" />
 				</div>
 			</div>
 			
 			<div v-else :class="$style.loading" >
 				영화 정보를 불러오는 중입니다.
+			</div>
+			<div :class="$style.reSearch">
+				<span :class="$style.title">찾으시는 영화가 없으신가요?</span>
+				<span @click="reSearchMovies()" :class="$style.search">재검색</span>
 			</div>
 		</div>
 	</div>
@@ -48,12 +52,35 @@
 				color: #4646C7;
 			}
 		}
+
+		> .reSearch {
+			> span {
+				display: inline-block;
+
+				font-size: 13px;
+				font-weight: normal;
+			}
+
+			> .title {
+				width: 100%;
+			}
+
+			> .search {
+				cursor: pointer;
+			}
+
+			> .search:hover {
+				font-weight: bold;
+
+				text-decoration: underline;
+			}
+		}
 	}
 }
 </style>
 
 <script lang="ts">
-import SearchItems from '@/components/SearchItems.vue';
+import MovieItems from '@/components/MovieItems.vue';
 import { Movie } from '@/structure/types';
 import { unwrapQuery } from '@/utils/formats';
 import axios from 'axios';
@@ -62,7 +89,7 @@ import { Component, Vue, Watch } from 'vue-property-decorator';
 
 @Component({
 	components: {
-		SearchItems
+		MovieItems
 	}
 })
 export default class Search extends Vue {
@@ -81,7 +108,7 @@ export default class Search extends Vue {
 				"authorization": this.$store.state.token
 			}
 		})
-		.catch(this.searchError).then(this.searchSuccess)
+		.catch(this.errorHandler).then(this.searchSuccess)
 	}
 
 	isLoaded(): boolean {
@@ -92,7 +119,7 @@ export default class Search extends Vue {
 		return false
 	}
 
-	searchError(error: any) {
+	errorHandler(error: any) {
 		alert(error.response.data)
 	}
 
@@ -108,6 +135,27 @@ export default class Search extends Vue {
 
 	getSearchQuery(): string {
 		return this.searchQuery
+	}
+
+	reSearchMovies() {
+		alert("추가 검색에는 시간이 다소 소요될 수 있습니다.")
+		
+		axios.get(process.env.VUE_APP_SERVER_ADDR + "/search/re/" + this.searchQuery, {
+			headers: {
+				"authorization": this.$store.state.token
+			}
+		})
+		.catch(this.errorHandler).then(this.reSearchSuccess)
+	}
+
+	reSearchSuccess(res: any) {
+		if (res == null) return
+
+		if (res.search == "none") return
+
+		this.movies = res.data.movies
+
+		this.$forceUpdate()
 	}
 
 	@Watch('$route.query')
