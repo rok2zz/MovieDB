@@ -9,6 +9,10 @@
 					<MovieItems :movies="movies" />
 				</div>
 			</div>
+
+			<div v-else-if="isSearchFailed()" :class="$style.fail">
+				<span>검색 결과가 없습니다.</span>
+			</div>
 			
 			<div v-else :class="$style.loading" >
 				영화 정보를 불러오는 중입니다.
@@ -23,6 +27,7 @@
 
 <style lang="scss" module>
 .index {
+
 	> .container {
 		width: 100%;
 
@@ -38,6 +43,10 @@
 			font-weight: bold;
 
 			text-align: center;
+		}
+
+		> .fail {
+			margin-bottom: 100px;
 		}
 
 		> .contents {
@@ -95,6 +104,7 @@ import { Component, Vue, Watch } from 'vue-property-decorator';
 export default class Search extends Vue {
 	searchQuery: string = ""
 	movies: Movie[] = []
+	searchFailed: boolean = false
 
 	mounted() {
 		this.init()
@@ -126,7 +136,9 @@ export default class Search extends Vue {
 	searchSuccess(res: any) {
 		if (res == null) return
 
-		if (res.search == "none") return
+		if (res.data.search == "none") {
+			this.searchFailed = true
+		} 
 
 		this.movies = res.data.movies
 
@@ -139,7 +151,7 @@ export default class Search extends Vue {
 
 	reSearchMovies() {
 		alert("추가 검색에는 시간이 다소 소요될 수 있습니다.")
-		
+
 		axios.get(process.env.VUE_APP_SERVER_ADDR + "/search/re/" + this.searchQuery, {
 			headers: {
 				"authorization": this.$store.state.token
@@ -151,15 +163,23 @@ export default class Search extends Vue {
 	reSearchSuccess(res: any) {
 		if (res == null) return
 
-		if (res.search == "none") return
+		if (res.data.search == "none") {
+			this.searchFailed = true
+		} 
 
 		this.movies = res.data.movies
 
 		this.$forceUpdate()
 	}
 
+	isSearchFailed(): boolean {
+		return this.searchFailed
+	}
+
 	@Watch('$route.query')
 	updateUrlQuery() {
+		this.movies = []
+		this.searchFailed = false
 		this.init()
 	}
 }

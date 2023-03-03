@@ -644,7 +644,7 @@ export default class Movies extends Vue {
 	}
 
 	isReviewsExist(): boolean {
-		if (this.reviews.length > 0) {
+		if (this.reviews?.length > 0) {
 			return true
 		}
 
@@ -755,6 +755,11 @@ export default class Movies extends Vue {
 	@Watch("this.reviews")
 	updateReviews() {
 		this.getReviews()
+	}
+
+	@Watch('$route.query')
+	updateMovieID() {
+		this.init()
 	}
 }
 </script>

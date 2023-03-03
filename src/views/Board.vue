@@ -1,24 +1,7 @@
 <template>
 	<div :class="$style.index">
 		<div :class="$style.container">
-			<div :class="$style.title">
-				<img :src="require('@/assets/img/logo_black.png')">
-			</div>
-			<div :class="$style.input">
-				<input v-on:keydown="keydownHandler" type="text" placeholder="아이디를 입력하세요." v-model="userID">
-			</div>
-			<div :class="$style.input">
-				<input v-on:keydown="keydownHandler" type="password" placeholder="비밀번호를 입력하세요." v-model="userPW">
-			</div>
-			<div :class="$style.login">
-				<button class="general-background-color" v-on:click="login()">로그인</button>
-			</div>
-			<div :class="$style.register">
-				<span>아직 회원이 아니신가요?</span>
-				<router-link to="/register">
-					<span>회원가입</span>
-				</router-link>
-			</div>
+
 		</div>
 	</div>
 </template>
