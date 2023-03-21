@@ -126,13 +126,6 @@ import axios from 'axios';
 export default class Login extends Vue {
 	userID: string = ""
 	userPW: string = ""
-	
-	mounted() {
-		if (this.$store.state.token != null) {
-            this.$router.push("/main")
-            return
-        } 
-	}
 
 	keydownHandler(e: KeyboardEvent) {
 		if (e.key == "Enter") {

@@ -28,6 +28,7 @@
 				<div>이메일<span>(선택)</span></div>
 				<input v-on:keydown="keydownHandler" type="text" placeholder="이메일을 입력하세요." v-model="email">
 			</div>
+			
 			<div :class="$style.register">
 				<button class="general-background-color" v-on:click="register()">회원가입</button>
 			</div>
@@ -39,7 +40,6 @@
 .index {
 	> .container {
 		width: 430px;
-		padding: 30px 0px 30px 0px;
 
 		font-size: 15px;
 		font-weight: bold;
@@ -47,6 +47,7 @@
 		margin: 0 auto;
 		margin-top: 50px;
 		margin-bottom: 50px;
+		padding: 30px 0px 30px 0px;
 
 		box-shadow: 0px 0px 3px 3px #ccc;
 		border-radius: 12px;
@@ -161,28 +162,30 @@ export default class Register extends Vue {
 
 		if (!confirm("가입하시겠습니까?")) return
 
-		let genderInit = 0
-		let userEmail
+		const GENDER_NONE: number = 0
+		const GENDER_FEMALE: number = 1
+		const GENDER_MALE: number = 2
+
+		let gender: number = GENDER_NONE
+		let userEmail: string | null = this.email.trim() == "" ? null : this.email
 		
 		switch (this.gender) {
 			case "남자": 
-				genderInit = 2
+				gender = GENDER_MALE
 				break
 			case "여자":
-				genderInit = 1
+				gender = GENDER_FEMALE
 				break
             case "선택 안함":
-				genderInit = 0
+				gender = GENDER_NONE
 				break
 		}
-
-		userEmail == "" ? null : this.email
 		
 		axios.post(process.env.VUE_APP_SERVER_ADDR + "/register", {
 			id: this.id,
 			pw: this.pw,
 			name: this.name,
-			gender: genderInit,
+			gender: gender,
 			email: userEmail
 		}).catch(this.registerError).then(this.registerSuccess)
  	}

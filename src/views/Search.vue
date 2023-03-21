@@ -1,13 +1,11 @@
 <template>
 	<div :class="$style.index">
 		<div :class="$style.container">
+			<div :class="$style.title">
+				<span>'{{ getSearchQuery() }}'</span>
+			</div>
 			<div v-if="isLoaded()" :class="$style.contents">
-				<div :class="$style.title">
-					<span>'{{ getSearchQuery() }}'</span>
-				</div>
-				<div :class="$style.list">
-					<MovieItems :movies="movies" />
-				</div>
+				<MovieItem v-for="(item, index) in movies" :key="'movie' + index" :movie="item" :class="$style.list" />
 			</div>
 
 			<div v-else-if="isSearchFailed()" :class="$style.fail">
@@ -49,16 +47,35 @@
 			margin-bottom: 100px;
 		}
 
+		> .title {
+			font-size: 20px;
+			font-weight: bold;
+
+			text-align: left;
+
+			margin-bottom: 30px;
+
+			color: #4646C7;
+		}
+
 		> .contents {
+			display: flex;
+			flex-wrap: wrap;
 
-			> .title {
-				width: 100%;
+			> .list {
+				width: calc(25% - 25px);
 
-				font-size: 20px;
+				margin-right: 33px;
+				margin-bottom: 30px;
 
-				text-align: left;
+				border: 1px solid #ccc;
+				border-radius: 12px;
 
-				color: #4646C7;
+				cursor: pointer;
+			}
+
+			> .list:nth-child(4n) {
+				margin-right: 0px;
 			}
 		}
 
@@ -89,8 +106,8 @@
 </style>
 
 <script lang="ts">
-import MovieItems from '@/components/MovieItems.vue';
-import { Movie } from '@/structure/types';
+import MovieItem from '@/components/MovieItem.vue';
+import { Movie } from '@/structure/movieTypes';
 import { unwrapQuery } from '@/utils/formats';
 import axios from 'axios';
 import { Component, Vue, Watch } from 'vue-property-decorator';
@@ -98,7 +115,7 @@ import { Component, Vue, Watch } from 'vue-property-decorator';
 
 @Component({
 	components: {
-		MovieItems
+		MovieItem
 	}
 })
 export default class Search extends Vue {
@@ -136,13 +153,15 @@ export default class Search extends Vue {
 	searchSuccess(res: any) {
 		if (res == null) return
 
+		this.movies = []
+
 		if (res.data.search == "none") {
 			this.searchFailed = true
+
+			return
 		} 
 
 		this.movies = res.data.movies
-
-		this.$forceUpdate()
 	}
 
 	getSearchQuery(): string {
@@ -157,19 +176,7 @@ export default class Search extends Vue {
 				"authorization": this.$store.state.token
 			}
 		})
-		.catch(this.errorHandler).then(this.reSearchSuccess)
-	}
-
-	reSearchSuccess(res: any) {
-		if (res == null) return
-
-		if (res.data.search == "none") {
-			this.searchFailed = true
-		} 
-
-		this.movies = res.data.movies
-
-		this.$forceUpdate()
+		.catch(this.errorHandler).then(this.searchSuccess)
 	}
 
 	isSearchFailed(): boolean {

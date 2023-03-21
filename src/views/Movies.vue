@@ -35,12 +35,7 @@
 						평점 및 리뷰 <span>{{ getReviewersNumber() }}</span>
 					</div>
 					<div v-if="isReviewsExist()" :class="$style.rating">
-						<span v-for="index in 5" :key="index" :class="$style.star">
-							<img v-if="getAverageRating() >= index" :src="require('@/assets/img/star.png')">
-							<img v-else-if="getAverageRating() >= (index - 0.5)" :src="require('@/assets/img/half_star.png')">
-							<img v-else :src="require('@/assets/img/empty_star.png')">
-						</span>
-						<span :class="$style.getRating">{{ getAvarageRatingToString() }}점</span>
+						<Stars :rating="getAverageRating()" type="avarage" />
 					</div>
 					<div v-else :class="$style.notExist">
 						작성된 평점 및 리뷰가 없습니다. <br>
@@ -51,12 +46,7 @@
 					<div v-if="isMyReviewExist()" :class="$style.myReview">
 						<div :class="$style.contents">
 							<div :class="$style.rating">
-								<span v-for="index in 5" :key="index" :class="$style.star">
-									<img v-if="getMyRating() >= index" :src="require('@/assets/img/star.png')">
-									<img v-else-if="getMyRating() >= (index - 0.5)" :src="require('@/assets/img/half_star.png')">
-									<img v-else :src="require('@/assets/img/empty_star.png')">
-								</span>
-								<span :class="$style.getRating">{{ getMyRating() }}점</span>
+								<Stars :rating="getMyRating()" />
 							</div>
 							<div :class="$style.info">
 								<div :class="$style.reviewer">{{ getMyReviewID() }}</div>
@@ -89,12 +79,7 @@
 					<div v-for="(item, index) in getReviewsList()" :key="'reviews' + index" :class="$style.list">
 						<div :class="$style.contents">
 							<div :class="$style.rating">
-								<span v-for="index in 5" :key="index" :class="$style.star">
-									<img v-if="item.rating >= index" :src="require('@/assets/img/star.png')">
-									<img v-else-if="item.rating >= (index - 0.5)" :src="require('@/assets/img/half_star.png')">
-									<img v-else :src="require('@/assets/img/empty_star.png')">
-								</span>
-								<span :class="$style.getRating">{{ item.rating }}점</span>
+								<Stars :rating="item.rating" />
 							</div>
 							<div :class="$style.info">
 								<div :class="$style.reviewer">{{ item.reviewer }}</div>
@@ -212,19 +197,6 @@
 
 				> .rating {
 					display: flex;
-
-					> .star {
-
-						> img {
-							width: 20px;
-						}
-					}
-
-					> .getRating {
-						margin-left: 10px;
-
-						transform: translateY(-2px)
-					}
 				}
 
 				> .myReview {
@@ -465,11 +437,15 @@
 <script lang="ts">
 import { unwrapQuery } from '@/utils/formats';
 import axios from 'axios';
-import { Movie, Review } from '@/structure/types';
+import { Movie, Review } from '@/structure/movieTypes';
 import { Component, Vue, Watch } from 'vue-property-decorator';
+import Stars from '@/components/Stars.vue';
 
-
-@Component
+@Component({
+	components: {
+		Stars
+	}
+})
 export default class Movies extends Vue {
 	movieID: string = ""
 	movie?: Movie
@@ -490,17 +466,21 @@ export default class Movies extends Vue {
 	init() {
 		this.movieID = unwrapQuery(this.$route.query.id)
 
+		this.getMovieApi() 
+
+		this.getReviewsApi()
+	}
+
+	getMovieApi() {
 		axios.get(process.env.VUE_APP_SERVER_ADDR + "/movie/" + this.movieID, {
 			headers: {
 				"authorization": this.$store.state.token
 			}
 		})
 		.catch(this.errorHandler).then(this.getMovieSuccess)
-
-		this.getReviews()
 	}
 
-	getReviews() {
+	getReviewsApi() {
 		axios.get(process.env.VUE_APP_SERVER_ADDR + "/review/" + this.movieID + "/" + this.page, {
 			headers: {
 				"authorization": this.$store.state.token
@@ -510,7 +490,7 @@ export default class Movies extends Vue {
 	}
 
 	getReviewsList(): Review[] {
-		return this.reviews ?? []
+		return this.reviews
 	}
 
 	isLoaded(): boolean {
@@ -535,8 +515,6 @@ export default class Movies extends Vue {
 		this.reviews = res.data.reviews
 		this.count = res.data.count
 		this.myReview = res.data.myReview
-
-		this.$forceUpdate()
 	}
 
 	getMovie(): Movie {
@@ -544,11 +522,11 @@ export default class Movies extends Vue {
 	}
 
 	getPosterPath(): string {
-		return this.getMovie()?.posterPath ?? ""
+		return this.getMovie().posterPath ?? ""
 	} 
 
 	getTitle(): string {
-		return this.getMovie().title ?? ""
+		return this.getMovie().title
 	}
 
 	getReleaseYear(): string {
@@ -582,6 +560,10 @@ export default class Movies extends Vue {
 	}
 
 	getOverview(): string {
+		if (this.getMovie().overview == "") {
+			return "요약 없음"
+		}
+
 		return this.getMovie().overview ?? ""
 	}
 
@@ -598,7 +580,7 @@ export default class Movies extends Vue {
 	}
 
 	getAverageRating(): number {
-		let sum = 0
+		let sum: number = 0
 
 		for (var i = 0; i < this.reviews.length; i++) {
 			sum += this.reviews[i].rating
@@ -644,11 +626,7 @@ export default class Movies extends Vue {
 	}
 
 	isReviewsExist(): boolean {
-		if (this.reviews?.length > 0) {
-			return true
-		}
-
-		return false
+		return this.reviews?.length > 0
 	}
 
 	isMyReviewExist(): boolean {
@@ -661,6 +639,8 @@ export default class Movies extends Vue {
 		}
 
 		if (!confirm("삭제하시겠습니까?")) return
+
+		if (this.myReview == null) return
 
 		axios.post(process.env.VUE_APP_SERVER_ADDR + "/review/delete", {
 			myReviewID: this.myReview?.id
@@ -676,7 +656,7 @@ export default class Movies extends Vue {
 
 		alert("삭제되었습니다.")
 
-		this.getReviews()
+		this.getReviewsApi()
 	}
 
 	submitReview() {
@@ -706,7 +686,7 @@ export default class Movies extends Vue {
 
 		alert("등록되었습니다.")
 
-		this.getReviews()
+		this.getReviewsApi()
 	}
 
 	isMoreReviewsExist() {
@@ -737,24 +717,12 @@ export default class Movies extends Vue {
 
 		let rows = res.data.reviews
 
-		for (var i = 0; i < rows.length; i++) {
-            this.reviews.push({
-                id: rows[i].id,
-                movieID: rows[i].movieID,
-                reviewerID: rows[i].reviewerID,
-                reviewer: rows[i].reviewer,
-                rating: rows[i].rating,
-                review: rows[i].review,
-                writedDate: rows[i].writedDate,
-            })
-        }
-
-		this.$forceUpdate()
+		this.reviews = this.reviews.concat(rows)
 	}
 
 	@Watch("this.reviews")
 	updateReviews() {
-		this.getReviews()
+		this.getReviewsApi()
 	}
 
 	@Watch('$route.query')

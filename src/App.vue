@@ -76,8 +76,7 @@ body {
 	> .container {
 		width: 100%;
 		min-width: 950px;
-		min-height: 100%;
-		
+		min-height: 100vh;
 
 		position: relative;
 
@@ -200,7 +199,6 @@ body {
 
 			position: absolute;
 			bottom: 0;
-			left: 0;
 
 			> .contents {
 				width: 600px;
@@ -228,7 +226,6 @@ body {
 						margin-bottom: 20px;
 					}
 				}
-
 			}
 		}
 	}
@@ -260,9 +257,9 @@ export default class App extends Vue {
 	}
 
 	logout() {
-		this.$store.state.token = null
+		if (!confirm("로그아웃 하시겠습니까?")) return
 
-		confirm("로그아웃 하시겠습니까?")
+		this.$store.state.token = null
 
 		alert("로그아웃 되었습니다.")
 
@@ -271,8 +268,8 @@ export default class App extends Vue {
 		}
 	}
 
-	goRandomMoviePage() {
-		axios.get(process.env.VUE_APP_SERVER_ADDR + "/random", {
+	async goRandomMoviePage() {
+		await axios.get(process.env.VUE_APP_SERVER_ADDR + "/random", {
 			headers: {
 				"authorization": this.$store.state.token
 			}
@@ -320,16 +317,10 @@ export default class App extends Vue {
 				case "/register":	
 				case "/login":	
 					alert("이미 로그인 했습니다.")
-					this.$router.push("main")
+					this.$router.push("/")
 					break;
 			}
 			return
-		}
-
-		switch (this.$route.path) {
-			case "/write":
-				alert("로그인이 필요합니다.")
-				this.$router.push("/login")
 		}
 	}
 

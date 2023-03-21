@@ -1,13 +1,13 @@
 <template>
 	<div :class="$style.index">
 		<div :class="$style.container">
+			<div :class="$style.title">
+				<span>'{{ getType() }}'</span>
+			</div>
 			<div v-if="isLoaded()" :class="$style.contents">
-				<div :class="$style.title">
-					<span>'{{ getType() }}'</span>
-				</div>
-				<div :class="$style.list">
-					<MovieItems :movies="movies" />
-				</div>
+				
+				<MovieItem v-for="(item, index) in movies" :key="'movie' + index" :movie="item" :class="$style.list" />
+
 				<div :class="$style.more">
 					<span v-if="isMoreMoviesExist()" @click="getMoreMovies()">더보기</span>
 				</div>
@@ -39,21 +39,41 @@
 			text-align: center;
 		}
 
+		> .title {
+			font-size: 20px;
+			font-weight: bold;
+
+			text-align: left;
+
+			margin-bottom: 30px;
+
+			color: #4646C7;
+		}
+
 		> .contents {
+			width: 700px;
 
-			> .title {
-				width: 100%;
+			display: flex;
+			flex-wrap: wrap;
 
-				font-size: 20px;
+			> .list {
+				width: calc(25% - 25px);
 
-				text-align: left;
+				margin-right: 33px;
+				margin-bottom: 30px;
 
-				color: #4646C7;
+				border: 1px solid #ccc;
+				border-radius: 12px;
+
+				cursor: pointer;
+			}
+
+			> .list:nth-child(4n) {
+				margin-right: 0px;
 			}
 
 			> .more {
-
-				text-align: center;
+				margin: 0 auto;
 
 				> span {
 					font-size: 18px;
@@ -73,8 +93,8 @@
 </style>
 
 <script lang="ts">
-import MovieItems from '@/components/MovieItems.vue';
-import { Movie } from '@/structure/types';
+import MovieItem from '@/components/MovieItem.vue';
+import { Movie } from '@/structure/movieTypes';
 import { unwrapQuery } from '@/utils/formats';
 import axios from 'axios';
 import { Component, Vue, Watch } from 'vue-property-decorator';
@@ -82,10 +102,10 @@ import { Component, Vue, Watch } from 'vue-property-decorator';
 
 @Component({
 	components: {
-		MovieItems
+		MovieItem
 	}
 })
-export default class Search extends Vue {
+export default class MoviesList extends Vue {
 	type: string = ""
 	movies: Movie[] = []
 	page: number = 0
@@ -108,11 +128,7 @@ export default class Search extends Vue {
 	}
 
 	isLoaded(): boolean {
-		if (this.movies?.length > 0) {
-			return true
-		}
-
-		return false
+		return this.movies.length > 0
 	}
 
 	errorHandler(error: any) {
@@ -122,24 +138,20 @@ export default class Search extends Vue {
 	getMainItemsSuccess(res: any) {
 		if (res == null) return
 
-		if (this.type == "byReviews") {
-			this.movies = res.data.byReviews
+		if (this.type == "reviews") {
+			this.movies = res.data.moviesReviews
 
 			this.count = res.data.count
-
-			this.$forceUpdate()
 
 			return
 		}
 
-		this.movies = res.data.byNewest
+		this.movies = res.data.moviesNewest
 		this.count = res.data.count
-
-		this.$forceUpdate()
 	}
 
 	getType(): string {
-		if (this.type == "byReviews") {
+		if (this.type == "reviews") {
 			return "리뷰 많은 순"
 		}
 
@@ -147,13 +159,13 @@ export default class Search extends Vue {
 	}
 
 	isMoreMoviesExist(): boolean {
-		return ((this.page + 1) * 8) < this.count
+		return this.getItemsPerPage() < this.count
 	}
 
 	getMoreMovies() {
 		this.page += 1
 
-		if (((this.page + 1) * 8) > this.count) {
+		if (this.getItemsPerPage() > this.count) {
 			return alert("더 불러올 영화가 없습니다.")
 		}
 
@@ -168,29 +180,19 @@ export default class Search extends Vue {
 	getMoreMoviesSuccess(res: any) {
 		if (res == null) return
 
-		let rows = []
+		let rows: Movie[] = []
 
-		if (this.type == "byReviews") {
-			rows = res.data.byReviews
+		if (this.type == "reviews") {
+			rows = res.data.moviesReviews
 		}
 
-		rows = res.data.byNewest
+		rows = res.data.moviesNewest
 
-		for (var i = 0; i < rows?.length; i++) {
-            this.movies.push({
-                id: rows[i].id,
-                title: rows[i].title,
-                overview: rows[i].overview,
-                posterPath: rows[i].posterPath,
-                tagline: rows[i].tagline,
-                releaseDate: rows[i].releaseDate,
-                genres: rows[i].genres,
-                country: rows[i].country,
-                runtime: rows[i].runtime
-            })
-        }
+		this.movies = this.movies.concat(rows)
+	}
 
-		this.$forceUpdate()
+	getItemsPerPage(): number {
+		return (this.page + 1) * 8
 	}
 
 	@Watch('$route.query')

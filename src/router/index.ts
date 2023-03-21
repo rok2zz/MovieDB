@@ -5,8 +5,7 @@ import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
 import Search from '../views/Search.vue'
 import Movies from '../views/Movies.vue'
-import MainItems from '../views/MainItems.vue'
-import Board from '../views/Board.vue'
+import MoviesList from '../views/MoviesList.vue'
 
 Vue.use(VueRouter)
 
@@ -16,9 +15,9 @@ const routes: Array<RouteConfig> = [
     name: 'main',
     component: Main
   },{
-    path: '/main',
-    name: 'mainitems',
-    component: MainItems
+    path: '/list',
+    name: 'list',
+    component: MoviesList
   },
   {
     path: '/login',
@@ -39,11 +38,6 @@ const routes: Array<RouteConfig> = [
     path: '/movies',
     name: 'movies',
     component: Movies
-  },
-  {
-    path: '/board',
-    name: 'board',
-    component: Board
   }
 ]
 
