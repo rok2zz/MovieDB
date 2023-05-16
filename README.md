@@ -1,6 +1,7 @@
 # MovieDB
 
 MovieDB with Vue.js, TypeScript, axios, API
+
 영화 제목으로 검색, 정보 열람 및 리뷰시스템
 
 ## Project setup
